@@ -17,11 +17,9 @@ This is System Design Document with small examples for a realtime chat applicati
 
 ## Services
 
-### Authentication Service 
+### Authentication Service ([details](AUTHENTICATION_SERVICE.md))
 This is a simple API services that allows users to register & log-in. 
 It returns a JWT token that can be used for authentication with other services.
-
-[details](AUTHENTICATION SERVICE.md)
 
 ### Messaging Service
 This service handles the messaging (sending and receiving) between users. 
