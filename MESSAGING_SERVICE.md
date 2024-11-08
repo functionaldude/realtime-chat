@@ -200,10 +200,10 @@ This command instructs a client to "upsert" a message in the local database, and
 ```kotlin
 class UpdateMessages(
   val channelId: String,
-  val messages: List<Message>,
+  val messages: List<ClientMessage>,
   val deleteExistingMessages: Boolean = false, // If true, delete all existing messages in the channel before inserting the new ones
 ): ServerCommand() {
-  class Message(
+  class ClientMessage(
     val messageId: String,
     val author: String, // The author's username
     val owned: Boolean, // True if message was sent by current user
@@ -218,6 +218,9 @@ class UpdateMessages(
   }
 }
 ```
+
+When transforming a [Message](CHAT_DATABASE.md#message) to a `ClientMessage`, the server checks if the message 
+was deleted, if yes the `content` is set to `null`, so the client can hide it in the UI, and delete the content from it's local storage.
 
 ## Subscription maps
 
