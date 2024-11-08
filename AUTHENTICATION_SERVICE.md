@@ -1,5 +1,6 @@
 # Authentication Service
 This is the API service that allows users to register & log-in.
+This service is stateless, it can be scaled horizontally without any limitation.
 
 ## Endpoints
 

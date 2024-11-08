@@ -1,6 +1,6 @@
 # Web Service
-
 This is a simple web service that serves the React app HTML & JS files and handles file uploads.
+This service is stateless, it can be scaled horizontally without any limitation.
 
 ## Endpoints
 

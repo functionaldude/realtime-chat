@@ -24,6 +24,7 @@ class Message(
   val channelId: String, 
   val authorId: String, 
   val sendDate: Date,
+  val sortScore: Long, // Currently just the UNIX timestamp when the message was posted
   val deleted: Boolean, // If true, the message will be hidden on the client side
 ) : MongoDocument() {
   class Content(
@@ -33,4 +34,4 @@ class Message(
 ```
 
 Indexes:
-- `{channelId: 1, timestamp: -1}`: to fetch all messages in a channel, sorted by sendDate descending
+- `{channelId: 1, sortScore: -1}`: to fetch all messages in a channel, sorted by sendDate descending

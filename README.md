@@ -10,12 +10,14 @@ This is System Design Document with small examples for a realtime chat applicati
 - The architecture should be modular for future extensibility with new features
 - The architecture should track certain metrics for monitoring, alerting and user engagement
 
-## 3rd party technologies
+## Frameworks and technologies used by this system
 - **MongoDB** for storing user data, session data and messages
+- **Redis** to notify other server instances of changes in a channel
 - **Cloudflare R2** object storage for storing files
 - **Socket IO** for sending and receiving messages
 - **Ktor** as authentication and web service
 - **Realm** as local database for native and web clients
+- A reverse proxy that terminates SSL, sets cookies for sticky sessions and handles load balancing between multiple instances of the services
 
 ## Code structure
 The source code is written in Kotlin to make developing cross-platform easier, it is divided into 4 main modules:
@@ -55,7 +57,7 @@ It returns a `sessionToken` that can be used for authentication with other servi
 This service handles the messaging (sending and receiving) between users. 
 It exposes a single Socket IO endpoint that clients can connect to. 
 
-### Web Service
+### Web Service ([details](WEB_SERVICE.md))
 Simple web service that serves the React app HTML & JS files.
 
 ### Database Services

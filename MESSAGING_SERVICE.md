@@ -1,6 +1,7 @@
 # Messaging Service
 This service handles the messaging (sending and receiving) between users.
-It exposes a single Socket IO endpoint that clients can connect to.  
+It exposes a single Socket IO endpoint that clients can connect to. 
+This service is stateful, but it can be scaled horizontally.
 
 ## Basic Concept
 | entity                              | explanation                                                                                                                                                                     |
@@ -15,8 +16,8 @@ It exposes a single Socket IO endpoint that clients can connect to.
 Socket IO is used for wrapping WebSockets, it allows for real-time, bidirectional and event-based communication between clients and the server.
 On the server the Java Socket IO server library is used, on the client the JS and native Socket IO libraries.
 
-There should be a middleware installed (reverse proxy) that terminates the SSL connection and forwards the unencrypted 
-traffic to the server, it should also set a cookie for sticky sessions. Because of this, the server can be stateful.
+There is middleware installed (reverse proxy) in the infrastructure that terminates the SSL connection and forwards the unencrypted 
+traffic to the server, it also sets a cookie for sticky sessions. Because of this, the server can be stateful.
 
 The server keeps track of all currently connected clients (=ChatClient), one [ChatUser](USER_DATABASE.md#user) can have multiple connections, for example from a web client and a mobile client.
 This is done via two maps:
@@ -31,7 +32,7 @@ clients of a specific user to send messages to them in real-time.
 
 ## Authentication
 The messaging service uses the `sessionToken` from the [Authentication Service](AUTHENTICATION_SERVICE.md) to authenticate users.
-It should be either passed as a cookie, or the dedicated session-token header. The `sessionToken` contains the `userId` of the user.
+It is either passed as a cookie, or the dedicated "session-token" header. The `sessionToken` contains the `userId` of the user.
 
 If the `sessionToken` is valid and authenticated, the server creates a new ChatClient for the user adds it to the map of connected clients.
 Every ChatClient has a unique `clientId` that is used to identify the client which is read from it's `SocketIOClient`.
@@ -80,14 +81,14 @@ Request command:
 class SearchUserRequest(val searchTerm: String): ClientCommand()
 ```
 
-Each keypress fires a new `SearchUserRequest` command to the server, but the server only responds 
+Each keypress fires a new `SearchUserRequest` command to the server (throttled by a debouncing function), but the server only responds 
 when `searchTerm.count() >= 3` to prevent too many results. 
 
 Response command:
 ```kotlin
 class SearchUserResponse(
   val matches: List<ChatUserSearchMatch>,
-  val searchTerm: String, // Send search term back to client for easier UI handling -> client should ignore all responses that don't equal the search term
+  val searchTerm: String, // Send search term back to client for easier UI handling -> client ignores all responses that don't equal the search term
 ): ServerCommand() {
   class ChatUserSearchMatch(
     val userId: String,
@@ -112,10 +113,15 @@ class SubscribeChannelWithTap(
 ): ClientCommand()
 ```
 Note: Either `channelId` or `userId` must be set, but not both.
-The client also sends `minMessageSortScore` and `maxMessageSortScore` to the server 
-to determine which messages to load (see [Subscription maps](#subscription-maps)) or `null` if client has no messages in local storage for this channel.
+The client also sends `minMessageSortScore` and `maxMessageSortScore` to the server to determine which messages 
+to load (see [Subscription maps](#subscription-maps)) or `null` if client has no messages in local storage for this channel.
 
-Once the channel is opened, the server will send the last `MESSAGE_LOAD_BATCH_SIZE` messages in the channel to the client.
+The server loads `MESSAGE_LOAD_BATCH_SIZE` messages from the database (sorted descending by `sortScore`).
+The server also creates an entry in the [subscription map](#subscription-maps) for the client, so it can receive 
+updates for this channel. The loaded messages are used to set the `minMessageSortScore`, the `maxMessageSortScore` 
+is `Long.MAX_VALUE` to receive future updates.
+
+Once the messages are loaded, they are sent to the client via an [UpdateMessages](#update-messages) command.
 
 ### Scroll upwards in channel
 With this command, a user can load more messages from a channel, the client sends it when the user scrolls upwards in the chat view.
@@ -129,8 +135,20 @@ class SubscribeChannelWithScroll(
 ): ClientCommand()
 ```
 
-The server will respond with the next `MESSAGE_LOAD_BATCH_SIZE` messages in the channel and extend the 
-subscription range (see [Subscription maps](#subscription-maps)).
+The server loads `MESSAGE_LOAD_BATCH_SIZE` messages from the database (sorted descending by `sortScore`), but with the following search query: 
+```json
+{
+  "sortScore": {
+    "$lte": "minMessageSortScore"
+  }
+}
+```
+This way we get the next batch of messages that are older than the oldest message in the client's local storage.
+
+The server also updates the `minMessageSortScore` in the [subscription map](#subscription-maps) for the client, 
+so it can receive real-time updates those older messages.
+
+Once the messages are loaded, they are sent to the client via an [UpdateMessages](#update-messages) command.
 
 ### Send message
 With this command, a user can send a new message to a channel.
@@ -148,10 +166,27 @@ class NewMessage(
 }
 ```
 
-The server will respond with an [UpdateMessages](#update-messages) command to notify of all clients that are subscribed to the channel.
+The user can either provide a text content or the `downloadUrl` of a file or both. In case of a file, the client
+calls the [get presigned upload URL](WEB_SERVICE.md#get-presigned-upload-url-post) endpoint to upload the 
+file and get the `downloadUrl`.
 
-The user can either provide a text content or the `downloadUrl` of a file or both. In case of a file, the client should
-call the [get presigned upload URL](WEB_SERVICE.md#get-presigned-upload-url-post) endpoint to upload the file and get the `downloadUrl`.
+The server will respond with an [UpdateMessages](#update-messages) command to all clients (including the one that 
+sent the `NewMessage` command) subscribed to the channel, [more details here](#channel-changes).
+
+### Delete message
+With this command, a user can delete an existing message in a channel.
+
+Request command:
+```kotlin
+class DeleteMessage(
+  val messageId: String,
+): ClientCommand()
+```
+
+The server laods the message and verifies if the user is the author of the message, if yes, the message marked as deleted.
+
+The server will respond with an [UpdateMessages](#update-messages) command to all clients (including the one that
+sent the `NewMessage` command) subscribed to the channel, [more details here](#channel-changes).
 
 ## Server Commands
 These command are sent by the server to the client, they are not always triggered by the client.
@@ -190,7 +225,7 @@ commands if a new [Message](CHAT_DATABASE.md#message) is posted in a channel, or
 class ChannelSubscription(
   val channelId: String,
   val minMessageSortScore: Long,
-  val maxMessageSortScore: Long,
+  val maxMessageSortScore: Long, // Long.MAX_VALUE can be used to subscribe to all future messages
 )
 
 typealias ClientSubMap = ConcurrentHashMap<ChatClient, ChannelSubscription>
@@ -199,3 +234,32 @@ val channelSubscriptions = ConcurrentHashMap<String, ClientSubMap>() // Map of a
 
 A `ChannelSubscription` is created when a client opens a channel, the `minMessageSortScore` and `maxMessageSortScore` can 
 be "expanded" by scrolling upwards (=sending [SubscribeChannelWithScroll](#scroll-upwards-in-channel) commands).  
+
+## Channel changes
+There are currently two types of changes that can happen in a channel. 
+1. A new message is posted
+2. An existing message is deleted
+
+These changes happen in the [chat database](CHAT_DATABASE.md) first, then clients can be notified, but only if they 
+have an active subscription range for the channel which includes the changed message's `sortScore`.
+
+The `channelSubscriptions` is a local map, every server instance has it's own map, the maps are not synchronized, 
+so every server instance is responsible for it's own clients.
+
+### Redis PubSub
+On start, every server instance subscribes to the Redis channel "channelUpdates". They can then push the 
+following update notification:
+
+```kotlin
+class ChannelUpdate(
+  val channelId: String,
+  val messageId: String,
+  val messageSortScore: Long,
+)
+```
+
+When a server instance receives a `ChannelUpdate` message, it checks if the 
+channel is in the `channelSubscriptions` map, if yes, then it checks if there are any clients that 
+have a `ChannelSubscription` with the [Message](CHAT_DATABASE.md#message)'s `sortScore` in the range.
+If yes, the message is loaded and sent via an [UpdateMessages](#update-messages) command to the client.
+
