@@ -7,7 +7,7 @@ This MongoDB database stores user data and session data.
 ```kotlin
 class ChatUser(
   val userId: String,
-  val username: String,
+  val username: String, // TODO add indexes
   
   val passwordHash: String, // hashed password using HMAC-SHA512, 
   val salt: String, // salt used for hashing, different salt for each user
@@ -15,3 +15,4 @@ class ChatUser(
   val lastLogin: Date,
 ) : MongoDocument()
 ```
+// TODO add indexes
