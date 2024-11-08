@@ -15,6 +15,30 @@ This is System Design Document with small examples for a realtime chat applicati
 - **Socket IO** for sending and receiving messages
 - **Ktor** as authentication and web service
 
+## Core architecture
+The source code is written in Kotlin to make developing cross-platform easier, it is divided into 4 main modules:
+
+| module         |                                                                         |
+|----------------|-------------------------------------------------------------------------|
+| common         | This module is pure kotlin, it is included in all other modules         |
+| backend-common | Module that holds shared business logic for backend services            |
+| auth           | Module that implements the Authentication Service                       |
+| messaging      | Module that implements the Messaging Service                            |
+| client-common  | Module that holds shared business logic to communicate with the backend |
+| client-native  | Native chat app via Kotlin Multiplatform and Compose Multiplatform      |
+| client-web     | Web chat app via KotlinJS and React                                     |
+
+The dependency graph is as follows:
+```
+└── common
+    ├── backend-common
+    │   ├── auth
+    │   └── messaging
+    └── client-common
+        ├── client-native
+        └── client-web 
+```
+
 ## Services
 
 ### Authentication Service ([details](AUTHENTICATION_SERVICE.md))
