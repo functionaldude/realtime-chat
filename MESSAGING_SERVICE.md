@@ -98,6 +98,9 @@ class SearchUserResponse(
 }
 ```
 
+The server uses the MongoDB text index on the `username` field to search for the user, depending on the load, 
+this can be later offloaded to a dedicated ellasticsearch instance.
+
 `SearchUserResponse.matches` are limited to 50 results to save resources.
 
 ### Open (or create) channel

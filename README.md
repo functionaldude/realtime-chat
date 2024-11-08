@@ -61,7 +61,12 @@ It exposes a single Socket IO endpoint that clients can connect to.
 Simple web service that serves the React app HTML & JS files.
 
 ### Database Services
-There are two logical databases in the system:
+There are two logical MongoDB databases in the system:
 - [User Database](USER_DATABASE.md) for storing user data
 - [Chat Database](CHAT_DATABASE.md) for storing messages and channels
 
+These can be on the same physical 3-node replica set or different ones, depending on the load.
+Sharding is also possible to distribute the load.
+
+Redis is only used for pub/sub to notify other server instances 
+of [changes in a channel](MESSAGING_SERVICE.md#channel-changes). Sharding is also possible, but most probably necessary.
