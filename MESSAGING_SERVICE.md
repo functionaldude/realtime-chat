@@ -48,8 +48,12 @@ In this case, the server will update the `SocketIOClient` of the existing ChatCl
 ## Client Commands
 Client commands are sent by the client and answered by the server.
 
+When a `ClientCommand` contains a `channelId`, the server checks if the user is member of the channel, 
+if not, it returns an error.
+
 ### Get channels
-With this command, a user can get all channels they are part of. They are sorted by the last message sent date, so the most recent channels are on top.
+With this command, a user can get all channels they are part of. They are sorted by the last message sent date, 
+so the most recent channels are on top.
 
 Request command:
 ```kotlin
@@ -76,7 +80,8 @@ Request command:
 class SearchUserRequest(val searchTerm: String): ClientCommand()
 ```
 
-Each keypress fires a new `SearchUserRequest` command to the server, but the server only responds when `searchTerm.count() >= 3` to prevent too results. 
+Each keypress fires a new `SearchUserRequest` command to the server, but the server only responds 
+when `searchTerm.count() >= 3` to prevent too many results. 
 
 Response command:
 ```kotlin
@@ -106,7 +111,8 @@ class SubscribeChannelWithTap(
   val maxMessageSortScore: Long? = null, // Sort score of the youngest message in the channel, null if client has no messages from this channel
 ): ClientCommand()
 ```
-Note: Either `channelId` or `userId` must be set, but not both. The client also sends `minMessageSortScore` and `maxMessageSortScore` to the server 
+Note: Either `channelId` or `userId` must be set, but not both.
+The client also sends `minMessageSortScore` and `maxMessageSortScore` to the server 
 to determine which messages to load (see [Subscription maps](#subscription-maps)) or `null` if client has no messages in local storage for this channel.
 
 Once the channel is opened, the server will send the last `MESSAGE_LOAD_BATCH_SIZE` messages in the channel to the client.
@@ -123,7 +129,29 @@ class SubscribeChannelWithScroll(
 ): ClientCommand()
 ```
 
-The server will respond with the next `MESSAGE_LOAD_BATCH_SIZE` messages in the channel and extend the subscription range (see [Subscription maps](#subscription-maps)).
+The server will respond with the next `MESSAGE_LOAD_BATCH_SIZE` messages in the channel and extend the 
+subscription range (see [Subscription maps](#subscription-maps)).
+
+### Send message
+With this command, a user can send a new message to a channel.
+
+Request command:
+```kotlin
+class NewMessage(
+  val channelId: String,
+  val content: Content,
+): ClientCommand() {
+  class Content(
+    val text: String? = null,
+    val fileUrl: String? = null,
+  )
+}
+```
+
+The server will respond with an [UpdateMessages](#update-messages) command to notify of all clients that are subscribed to the channel.
+
+The user can either provide a text content or the `downloadUrl` of a file or both. In case of a file, the client should
+call the [get presigned upload URL](WEB_SERVICE.md#get-presigned-upload-url-post) endpoint to upload the file and get the `downloadUrl`.
 
 ## Server Commands
 These command are sent by the server to the client, they are not always triggered by the client.

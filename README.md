@@ -15,6 +15,7 @@ This is System Design Document with small examples for a realtime chat applicati
 - **Cloudflare R2** object storage for storing files
 - **Socket IO** for sending and receiving messages
 - **Ktor** as authentication and web service
+- **Realm** as local database for native and web clients
 
 ## Code structure
 The source code is written in Kotlin to make developing cross-platform easier, it is divided into 4 main modules:
@@ -58,3 +59,7 @@ It exposes a single Socket IO endpoint that clients can connect to.
 Simple web service that serves the React app HTML & JS files.
 
 ### Database Services
+There are two logical databases in the system:
+- [User Database](USER_DATABASE.md) for storing user data
+- [Chat Database](CHAT_DATABASE.md) for storing messages and channels
+

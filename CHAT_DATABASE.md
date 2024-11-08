@@ -7,7 +7,7 @@
 ```kotlin
 class Channel(
   val _id: String, // channelId, random unique ID
-  val userIds: Set<String>,
+  val members: Set<String>,
   val lastOpened: Date, // Only used for analytics to track user engagement
   val lastMessageSentDate: Date,
 ) : MongoDocument()
