@@ -4,7 +4,7 @@ It exposes a single Socket IO endpoint that clients can connect to.
 This service is stateful, but it can be scaled horizontally.
 
 ## Basic Concept
-| entity                              | explanation                                                                                                                                                                     |
+| entity                              |                                                                                                                                                                                 |
 |-------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [ChatUser](USER_DATABASE.md#user)   | Represents a single user                                                                                                                                                        |
 | [ChatClient](USER_DATABASE.md#user) | Represents a connected client of a ChatUser, it contains a `ChatUser` and a `SocketIOClient`                                                                                    |
