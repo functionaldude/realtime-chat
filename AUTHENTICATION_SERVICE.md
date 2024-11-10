@@ -62,12 +62,6 @@ class RegisterResponse(
 ### Logout (POST)
 
 This endpoint allows users to log out. It takes no input and returns a 302 redirect to the login page.
-
-Request:
-```kotlin
-class LogoutRequest()
-```
-
 The [SessionToken](USER_DATABASE.md#sessiontoken) is invalidated by setting the `expiryDate` to `Date()`. This ensures that the user 
 cannot use the session token for future requests.
 
