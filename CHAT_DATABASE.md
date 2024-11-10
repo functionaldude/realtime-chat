@@ -21,7 +21,7 @@ Indexes:
 ```kotlin
 class Message(
   val _id: String, // messageId, random unique ID, unique across all channels
-  val channelId: String, (most suited for shardKey, so all messages are on the same shard)
+  val channelId: String, // most suited for shardKey, so all messages are on the same shard
   val authorId: String, 
   val sendDate: Date,
   val sortScore: Long, // Currently just the UNIX timestamp when the message was posted
