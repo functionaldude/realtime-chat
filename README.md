@@ -17,6 +17,7 @@ This is System Design Document with small examples for a realtime chat applicati
 - **Socket IO** for sending and receiving messages
 - **Ktor** as authentication and web service
 - **Realm** as local database for native and web clients
+- **Sentry** for error reporting
 - A reverse proxy that terminates SSL, sets cookies for sticky sessions and handles load balancing between multiple instances of the services
 
 ## Code structure
