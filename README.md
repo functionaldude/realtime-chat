@@ -89,12 +89,12 @@ of [changes in a channel](MESSAGING_SERVICE.md#channel-changes). Sharding is als
 
 The system tracks certain metrics for monitoring, alerting and user engagement:
 
-| metric                                 |                                                                                           |
-|----------------------------------------|-------------------------------------------------------------------------------------------|
-| DAU / WAU / MAU                        | Tracked via Redis HyperLogLog entries (value as userid) and regularly written to Postgres |
-| Command execution performance          | Tracked in memory over 5sec, then written to Postgres                                     |
-| Cache hit ratio                        | Tracked in memory over 5sec, then written to Postgres                                     |
-| API response times & HTTP status codes | Tracked via DropWizard, then written to Postgres                                          |
-| Login result (success / fail)          | Tracked in memory over 5sec, then written to Postgres                                     |
+| metric                                 |                                                                                             |
+|----------------------------------------|---------------------------------------------------------------------------------------------|
+| DAU / WAU / MAU                        | Tracked via Redis HyperLogLog entries (`userId` as value) and regularly written to Postgres |
+| Command execution performance          | Tracked in memory over 5sec, then written to Postgres                                       |
+| Cache hit ratio                        | Tracked in memory over 5sec, then written to Postgres                                       |
+| API response times & HTTP status codes | Tracked via DropWizard, then written to Postgres                                            |
+| Login result (success / fail)          | Tracked in memory over 5sec, then written to Postgres                                       |
 
 The metrics can be read from Postgres and visualized via Grafana.
