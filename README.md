@@ -27,7 +27,7 @@ This is System Design Document with small examples for a realtime chat applicati
 
 ## Code structure
 
-The source code is written in Kotlin to make developing cross-platform easier, it is divided into 4 main modules:
+The source code is written in Kotlin to make developing cross-platform easier, it is divided into the following modules:
 
 | module         |                                                                         |
 |----------------|-------------------------------------------------------------------------|
