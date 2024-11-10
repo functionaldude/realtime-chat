@@ -269,3 +269,7 @@ channel is in the `channelSubscriptions` map, if yes, then it checks if there ar
 have a `ChannelSubscription` with the [Message](CHAT_DATABASE.md#message)'s `sortScore` in the range.
 If yes, the message is loaded and sent via an [UpdateMessages](#update-messages) command to the client.
 
+## Channel cache
+
+Because a [Channel](CHAT_DATABASE.md#channel) rarely changes, the server caches the channels in memory to save 
+DB IO and load time.

@@ -1,7 +1,9 @@
 # realtime-chat
+
 This is System Design Document with small examples for a realtime chat application.
 
 ## Requirements
+
 - Users should be able to log in via username & password
 - Users should be able to send and receive messages to another user
 - Messages can contain text, a single image, video, or any other file
@@ -11,16 +13,20 @@ This is System Design Document with small examples for a realtime chat applicati
 - The architecture should track certain metrics for monitoring, alerting and user engagement
 
 ## Frameworks and technologies used by this system
+
 - **MongoDB** for storing user data, session data and messages
-- **Redis** to notify other server instances of changes in a channel
+- **Redis** to notify other server instances of changes in a channel and tracking of user engagement
 - **Cloudflare R2** object storage for storing files
 - **Socket IO** for sending and receiving messages
 - **Ktor** as authentication and web service
 - **Realm** as local database for native and web clients
 - **Sentry** for error reporting
-- A reverse proxy that terminates SSL, sets cookies for sticky sessions and handles load balancing between multiple instances of the services
+- **Postgres** for tracking user engagement and application performance
+- A reverse proxy that terminates SSL, sets cookies for sticky sessions and handles load balancing between multiple
+  instances of the services
 
 ## Code structure
+
 The source code is written in Kotlin to make developing cross-platform easier, it is divided into 4 main modules:
 
 | module         |                                                                         |
@@ -35,6 +41,7 @@ The source code is written in Kotlin to make developing cross-platform easier, i
 | client-web     | Web chat app via KotlinJS and React                                     |
 
 The dependency graph is as follows:
+
 ```
 └── common
     ├── backend-common
@@ -46,28 +53,48 @@ The dependency graph is as follows:
         └── client-web   
 ```
 
-The **common** module, holds various shared "Request" and "Response" classes that are used by all other modules, they are serialized using `kotlinx.serialization`.
+The **common** module, holds various shared "Request" and "Response" classes that are used by all other modules, they
+are serialized using `kotlinx.serialization`.
 
 ## Services
 
 ### Authentication Service ([details](AUTHENTICATION_SERVICE.md))
-This is a simple API services that allows users to register & log-in. 
+
+This is a simple API services that allows users to register & log-in.
 It returns a `sessionToken` that can be used for authentication with other services.
 
 ### Messaging Service ([details](MESSAGING_SERVICE.md))
-This service handles the messaging (sending and receiving) between users. 
-It exposes a single Socket IO endpoint that clients can connect to. 
+
+This service handles the messaging (sending and receiving) between users.
+It exposes a single Socket IO endpoint that clients can connect to.
 
 ### Web Service ([details](WEB_SERVICE.md))
+
 Simple web service that serves the React app HTML & JS files.
 
 ### Database Services
+
 There are two logical MongoDB databases in the system:
+
 - [User Database](USER_DATABASE.md) for storing user data
 - [Chat Database](CHAT_DATABASE.md) for storing messages and channels
 
 These can be on the same physical 3-node replica set or different ones, depending on the load.
 Sharding is also possible to distribute the load.
 
-Redis is only used for pub/sub to notify other server instances 
+Redis is only used for pub/sub to notify other server instances
 of [changes in a channel](MESSAGING_SERVICE.md#channel-changes). Sharding is also possible, but most probably necessary.
+
+## Tracking
+
+The system tracks certain metrics for monitoring, alerting and user engagement:
+
+| metric                                 |                                                                                           |
+|----------------------------------------|-------------------------------------------------------------------------------------------|
+| DAU / WAU / MAU                        | Tracked via Redis HyperLogLog entries (value as userid) and regularly written to Postgres |
+| Command execution performance          | Tracked in memory over 5sec, then written to Postgres                                     |
+| Cache hit ratio                        | Tracked in memory over 5sec, then written to Postgres                                     |
+| API response times & HTTP status codes | Tracked via DropWizard, then written to Postgres                                          |
+| Login result (success / fail)          | Tracked in memory over 5sec, then written to Postgres                                     |
+
+The metrics can be read from Postgres and visualized via Grafana.
