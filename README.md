@@ -24,6 +24,7 @@ This is a System Design Document for a realtime chat application.
 - **Postgres** for tracking user engagement and application performance
 - A reverse proxy that terminates SSL, sets cookies for sticky sessions and handles load balancing between multiple
   instances of the services
+- **Docker** for running the services (preferably with some orchestration)
 
 ## Code structure
 
