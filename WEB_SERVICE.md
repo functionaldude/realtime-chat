@@ -8,7 +8,7 @@ This service is stateless, it can be scaled horizontally without any limitation.
 This endpoint serves an HTML file that contains the React app.
 
 #### Session Token
-When a user loads the React app, an "unauthenticated" anonymous `sessionToken` is created on the backend.
+When a user loads the React app, an "unauthenticated" anonymous [SessionToken](USER_DATABASE.md#sessiontoken) is created on the backend.
 
 #### CSRF Protection
 Additionally, it also contains the meta tag for CSRF protection:
@@ -18,7 +18,7 @@ Additionally, it also contains the meta tag for CSRF protection:
 
 ### Get presigned upload URL (POST)
 This endpoint returns a presigned URL that can be used to upload a file to the Cloudflare R2 object storage.
-The current user's `sessionToken` is used to authenticate the request (via cookie or "session-token" header).
+The current user's [SessionToken](USER_DATABASE.md#sessiontoken) is used to authenticate the request (via cookie or "session-token" header).
 
 Request:
 ```kotlin

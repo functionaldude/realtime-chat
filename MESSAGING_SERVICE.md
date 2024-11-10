@@ -31,10 +31,12 @@ The `connectedClients` can be used to directly access a client, the `connectedUs
 clients of a specific user to send messages to them in real-time.
 
 ## Authentication
-The messaging service uses the `sessionToken` from the [Authentication Service](AUTHENTICATION_SERVICE.md) to authenticate users.
-It is either passed as a cookie, or the dedicated "session-token" header. The `sessionToken` contains the `userId` of the user.
+The messaging service uses the [SessionToken](USER_DATABASE.md#sessiontoken) from 
+the [Authentication Service](AUTHENTICATION_SERVICE.md) to authenticate users.
+It is either passed as a cookie, or the dedicated "session-token" header. The session token contains the `userId` of the user.
 
-If the `sessionToken` is valid and authenticated, the server creates a new ChatClient for the user adds it to the map of connected clients.
+If the [SessionToken](USER_DATABASE.md#sessiontoken) is valid and authenticated, the server creates a new 
+ChatClient for the user adds it to the map of connected clients.
 Every ChatClient has a unique `clientId` that is used to identify the client which is read from it's `SocketIOClient`.
 
 The Client can also send the `oldId` parameter in the `connect` event, this is used to reconnect to an existing ChatClients. 

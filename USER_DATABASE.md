@@ -19,3 +19,15 @@ class ChatUser(
 Indexes:
 - `{username: 1}`: to fetch a specific user by username
 - `{username: "text"}`: search for a specific user by text search
+
+### SessionToken
+
+```kotlin
+class SessionToken(
+  val _id: String, // sessionToken, random unique ID
+  val userId: String? = null, // userId of the user that owns this session, null if unauthenticated
+  val creationDate: Date,
+  val lastUsed: Date,
+  val expiryDate: Date,
+) : MongoDocument()
+```

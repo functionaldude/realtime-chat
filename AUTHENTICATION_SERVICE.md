@@ -5,8 +5,10 @@ This service is stateless, it can be scaled horizontally without any limitation.
 ## Endpoints
 
 ### Login (POST)
-This endpoint allows users to log in. It takes the `username` and `password` as input and returns a `sessionToken`. 
-Additionally, it also sets a cookie with the `sessionToken` for future requests, the cookie is `HttpOnly` and `Secure`, and `SameSite=Strict`.
+This endpoint allows users to log in. It takes the `username` and `password` as input and returns 
+a [SessionToken](USER_DATABASE.md#sessiontoken) `_id` as string. 
+Additionally, it also sets a cookie with the [SessionToken](USER_DATABASE.md#sessiontoken) for future requests, 
+the cookie is `HttpOnly` and `Secure`, and `SameSite=Strict`.
 
 Request:
 ```kotlin
@@ -22,7 +24,7 @@ If the login is coming form the native app, this endpoint verifies if the `appCh
 
 Password is hashed and compared with the stored hash.
 
-If all checks pass, the `userId` is set in the `sessionToken`, from then on the session is authenticated.
+If all checks pass, the `userId` is set in the [SessionToken](USER_DATABASE.md#sessiontoken), from then on the session is authenticated.
 The session token is returned, and in case of the web client also set as a cookie.
 Response:
 ```kotlin
@@ -56,6 +58,18 @@ class RegisterResponse(
     val errorMessage: String? // null if register successful, show error message to user
 )
 ```
+
+### Logout (POST)
+
+This endpoint allows users to log out. It takes no input and returns a 302 redirect to the login page.
+
+Request:
+```kotlin
+class LogoutRequest()
+```
+
+The [SessionToken](USER_DATABASE.md#sessiontoken) is invalidated by setting the `expiryDate` to `Date()`. This ensures that the user 
+cannot use the session token for future requests.
 
 ## Password hashing and storage 
 

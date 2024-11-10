@@ -61,7 +61,7 @@ are serialized using `kotlinx.serialization`.
 ### Authentication Service ([details](AUTHENTICATION_SERVICE.md))
 
 This is a simple API services that allows users to register & log-in.
-It returns a `sessionToken` that can be used for authentication with other services.
+It returns a [SessionToken](USER_DATABASE.md#sessiontoken) that can be used for authentication with other services.
 
 ### Messaging Service ([details](MESSAGING_SERVICE.md))
 
