@@ -29,7 +29,13 @@ class Message(
 ) : MongoDocument() {
   class Content(
     val textContent: String? = null,
-  )
+    val fileContent: FileContent? = null,
+  ) {
+    class FileContent(
+      val filename: String,
+      val downloadUrl: String,
+    )
+  }
 }
 ```
 
