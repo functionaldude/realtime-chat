@@ -1,6 +1,6 @@
 # realtime-chat
 
-This is System Design Document with small examples for a realtime chat application.
+This is a System Design Document for a realtime chat application.
 
 ## Requirements
 
@@ -24,21 +24,22 @@ This is System Design Document with small examples for a realtime chat applicati
 - **Postgres** for tracking user engagement and application performance
 - A reverse proxy that terminates SSL, sets cookies for sticky sessions and handles load balancing between multiple
   instances of the services
+- **Docker** for running the services (preferably with some orchestration)
 
 ## Code structure
 
-The source code is written in Kotlin to make developing cross-platform easier, it is divided into 4 main modules:
+The source code is written in Kotlin to make developing cross-platform easier, it is divided into the following modules:
 
-| module         |                                                                         |
-|----------------|-------------------------------------------------------------------------|
-| common         | This module is pure kotlin, it is included in all other modules         |
-| backend-common | Module that holds shared business logic for backend services            |
-| auth           | Module that implements the Authentication Service                       |
-| messaging      | Module that implements the Messaging Service                            |
-| web            | Module that implements the Web Service                                  |
-| client-common  | Module that holds shared business logic to communicate with the backend |
-| client-native  | Native chat app via Kotlin Multiplatform and Compose Multiplatform      |
-| client-web     | Web chat app via KotlinJS and React                                     |
+| module         |                                                                             |
+|----------------|-----------------------------------------------------------------------------|
+| common         | This module is included in all other modules, only contains shared payloads |
+| backend-common | Module that holds shared business logic for backend services                |
+| auth           | Module that implements the Authentication Service                           |
+| messaging      | Module that implements the Messaging Service                                |
+| web            | Module that implements the Web Service                                      |
+| client-common  | Module that holds shared business logic to communicate with the backend     |
+| client-native  | Native chat app via Kotlin Multiplatform and Compose Multiplatform          |
+| client-web     | Web chat app via KotlinJS and React                                         |
 
 The dependency graph is as follows:
 
@@ -78,11 +79,11 @@ There are two logical MongoDB databases in the system:
 - [User Database](USER_DATABASE.md) for storing user data
 - [Chat Database](CHAT_DATABASE.md) for storing messages and channels
 
-These can be on the same physical 3-node replica set or different ones, depending on the load.
-Sharding is also possible to distribute the load.
+These can be on the same physical 3-node replica set or different one, depending on the load.
+Sharding is also recommended to distribute the load.
 
 Redis is only used for pub/sub to notify other server instances
-of [changes in a channel](MESSAGING_SERVICE.md#channel-changes). Sharding is also possible, but most probably necessary.
+of [changes in a channel](MESSAGING_SERVICE.md#channel-changes). Sharding is also possible, but most probably not necessary.
 
 ## Tracking
 

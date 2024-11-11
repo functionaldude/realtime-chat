@@ -6,7 +6,7 @@ This MongoDB database stores user data and session data.
 
 ```kotlin
 class ChatUser(
-  val _id: String, // userId, random unique ID
+  val _id: String, // userId, random unique ID (most suited for shardKey)
   val username: String,
   
   val passwordHash: String, // hashed password using HMAC-SHA512, 
@@ -25,7 +25,7 @@ Indexes:
 ```kotlin
 class SessionToken(
   val _id: String, // sessionToken, random unique ID
-  val userId: String? = null, // userId of the user that owns this session, null if unauthenticated
+  val userId: String? = null, // userId of the user that owns this session, null if unauthenticated (most suited for shardKey)
   val creationDate: Date,
   val lastUsed: Date,
   val expiryDate: Date,
